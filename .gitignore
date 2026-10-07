@@ -1,9 +1,7 @@
-Backend/.env
-Backend/private_media/
-*.pyc
-__pycache__/
-*.bak
-.env
 node_modules/
+.env
+.env.*
+!.env.example
 dist/
-
+__pycache__/
+*.pyc
