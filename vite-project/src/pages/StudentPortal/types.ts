@@ -15,7 +15,7 @@ export const ENROLLMENT_TYPE_LABELS: Record<EnrollmentType, string> = {
  * /project-files/:id/download/ endpoint, never this `file` URL
  * directly. */
 export interface ProjectFile {
-  id: number;
+  id: string;
   file: string | null;
   /** Just the filename (no folder path), for display. */
   name: string;
@@ -24,14 +24,14 @@ export interface ProjectFile {
 
 /** One attachment on a Certificate — mirrors ProjectFile. */
 export interface CertificateFile {
-  id: number;
+  id: string;
   file: string | null;
   name: string;
   uploaded_at: string;
 }
 
 export interface Project {
-  id: number;
+  id: string;
   title: string;
   description: string;
   /** Comma-separated, e.g. "React, Node.js, MongoDB" — matches the
@@ -51,7 +51,7 @@ export interface Project {
 }
 
 export interface Certificate {
-  id: number;
+  id: string;
   title: string;
   issuer: string;
   issue_date: string | null;
@@ -66,7 +66,7 @@ export interface Certificate {
 /** Full detail — a student's own profile (Student) or any student
  * (Admin), as returned by /students/me/ and /admin/students/:id/. */
 export interface StudentProfile {
-  id: number;
+  id: string;
   phone_number: string;
   full_name: string;
   college_name: string;
@@ -85,7 +85,7 @@ export interface StudentProfile {
 /** Lightweight row for the Admin console's student directory, as
  * returned by /admin/students/. */
 export interface StudentListItem {
-  id: number;
+  id: string;
   phone_number: string;
   full_name: string;
   course_name: string;
