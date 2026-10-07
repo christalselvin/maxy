@@ -1,8 +1,0 @@
-services:
-  frontend:
-    build: .
-    container_name: maxotech_website_frontend
-    restart: always
-    ports:
-      - "4173:4173"
-
