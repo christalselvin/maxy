@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes floatSlower {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-30px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-floatSlow {
+  animation: floatSlow 10s ease-in-out infinite;
+}
+
+.animate-floatSlower {
+  animation: floatSlower 12s ease-in-out infinite;
+}
+
+
+.bubble {
+  position: absolute;
+  border-radius: 9999px;
+
+  /* Blue inside */
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+
+  /* Soft pink outline */
+  border: 2px solid rgba(202, 151, 174, 0.9);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 25px 50px rgba(59, 130, 246, 0.25),
+    inset 0 0 30px rgba(255, 255, 255, 0.6);
+
+  transition: transform 0.3s ease;
+}
+
+.bubble:hover {
+  transform: scale(1.08);
+}
+
+.bubble.xl {
+  width: 11rem;
+  height: 11rem;
+  animation: float 6s ease-in-out infinite;
+}
+
+@media (min-width: 768px) {
+  .bubble.xl {
+    width: 13rem;
+    height: 13rem;
+  }
+}
+
+.bubble.md {
+  width: 8rem;
+  height: 8rem;
+}
+
+.bubble.sm {
+  width: 5.5rem;
+  height: 5.5rem;
+}
+ 

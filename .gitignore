@@ -1,0 +1,9 @@
+Backend/.env
+Backend/private_media/
+*.pyc
+__pycache__/
+*.bak
+.env
+node_modules/
+dist/
+

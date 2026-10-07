@@ -1,0 +1,162 @@
+/* Colors: tweak as needed */
+:root{
+  --fuschia: #ff0081;
+  --fuschia-dark: #e60073;
+  --button-text: #ffffff;
+  --baby-blue: #f8faff;
+  --shadow-color: rgba(255, 0, 130, 0.45);
+  --glass: rgba(255,255,255,0.06);
+}
+
+/* Base reset for the button */
+.bubbly-button{
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-size: 0.95rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  background-color: var(--fuschia);
+  color: var(--button-text);
+  box-shadow: 0 8px 30px var(--shadow-color);
+  transition: transform 160ms ease, box-shadow 220ms ease, background-color 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+  overflow: visible;
+}
+
+/* Slight lift on hover */
+.bubbly-button:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 14px 40px rgba(255,0,130,0.35);
+}
+
+/* Active press */
+.bubbly-button:active{
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  background-color: var(--fuschia-dark);
+}
+
+/* Ghost variant (for navbar or subtle uses) */
+.bubbly-ghost{
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  color: var(--fuschia);
+  box-shadow: none;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Decorative bubble layers: use pseudo-elements for top & bottom */
+.bubbly-button::before,
+.bubbly-button::after{
+  content: "";
+  position: absolute;
+  left: -20%;
+  width: 140%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  transition: all 0.5s ease-in-out;
+}
+
+/* top bubbles (before) - initially hidden */
+.bubbly-button::before{
+  top: -75%;
+  display: none;
+  background-image:
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%),
+    radial-gradient(circle, transparent 20%, var(--fuschia) 20%, transparent 30%),
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%),
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%),
+    radial-gradient(circle, transparent 10%, var(--fuschia) 15%, transparent 20%),
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%),
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%),
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%),
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%);
+  background-size: 10% 10%, 20% 20%, 15% 15%, 20% 20%, 18% 18%, 10% 10%, 15% 15%, 10% 10%, 18% 18%;
+  background-position: 0% 80%, -5% 20%, 10% 40%, 20% 0%, 30% 30%, 22% 50%, 50% 50%, 65% 20%, 85% 30%;
+  opacity: 0.95;
+  filter: blur(.2px) saturate(1.05);
+}
+
+/* bottom bubbles (after) - initially hidden */
+.bubbly-button::after{
+  bottom: -75%;
+  display: none;
+  background-image:
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%),
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%),
+    radial-gradient(circle, transparent 10%, var(--fuschia) 15%, transparent 20%),
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%),
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%),
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%),
+    radial-gradient(circle, var(--fuschia) 20%, transparent 20%);
+  background-size: 15% 15%, 20% 20%, 18% 18%, 20% 20%, 15% 15%, 10% 10%, 20% 20%;
+  background-position: 5% 90%, 10% 90%, 10% 90%, 15% 90%, 25% 90%, 25% 90%, 40% 90%;
+  opacity: 0.95;
+  filter: blur(.2px) saturate(1.05);
+}
+
+/* Core animate class: reveal pseudo-elements and run keyframes */
+.bubbly-button.animate::before,
+.bubbly-button.animate::after{
+  display: block;
+}
+
+/* keyframes for top bubbles */
+@keyframes topBubbles {
+  0%{
+    background-position: 5% 90%, 10% 90%, 10% 90%, 15% 90%, 25% 90%, 25% 90%, 40% 90%, 55% 90%, 70% 90%;
+  }
+  50% {
+    background-position: 0% 80%, 0% 20%, 10% 40%, 20% 0%, 30% 30%, 22% 50%, 50% 50%, 65% 20%, 90% 30%;
+  }
+  100% {
+    background-position: 0% 70%, 0% 10%, 10% 30%, 20% -10%, 30% 20%, 22% 40%, 50% 40%, 65% 10%, 90% 20%;
+    background-size: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%;
+    opacity: 0;
+  }
+}
+
+/* keyframes for bottom bubbles */
+@keyframes bottomBubbles {
+  0%{
+    background-position: 10% -10%, 30% 10%, 55% -10%, 70% -10%, 85% -10%, 70% -10%, 70% 0%;
+  }
+  50% {
+    background-position: 0% 80%, 20% 80%, 45% 60%, 60% 100%, 75% 70%, 95% 60%, 105% 0%;
+  }
+  100% {
+    background-position: 0% 90%, 20% 90%, 45% 70%, 60% 110%, 75% 80%, 95% 70%, 110% 10%;
+    background-size: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%;
+    opacity: 0;
+  }
+}
+
+/* Apply animations only when animate class present */
+.bubbly-button.animate::before{
+  animation: topBubbles 0.75s ease-in-out forwards;
+}
+.bubbly-button.animate::after{
+  animation: bottomBubbles 0.75s ease-in-out forwards;
+}
+
+/* Focus styles for accessibility */
+.bubbly-button:focus{
+  outline: 3px solid rgba(11,61,145,0.18); /* navy-ish focus ring */
+  outline-offset: 3px;
+}
+
+/* Small helper sizes (optional) */
+.bubbly-button.sm { font-size: 0.85rem; padding: .5rem .9rem; }
+.bubbly-button.lg { font-size: 1rem; padding: .9rem 1.5rem; }
+
+/* Responsive example: reduce shadow on mobile */
+@media (max-width: 640px) {
+  .bubbly-button { box-shadow: 0 6px 20px rgba(255,0,130,0.25); }
+}
