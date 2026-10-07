@@ -15,7 +15,7 @@ import type { AxiosError, InternalAxiosRequestConfig } from "axios";
  * case they ever need to point elsewhere.
  */
 export const API_BASE_URL =
-  import.meta.env.import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
   "http://localhost:8000";
 
 const ACCESS_TOKEN_KEY = "maxotechs_portal_access_token";
