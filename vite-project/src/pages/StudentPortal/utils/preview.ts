@@ -63,7 +63,7 @@ async function fetchPreview(
 
 /** Legacy single-file preview — mirrors downloadProject in download.ts. */
 export function previewProject(
-  projectId: number,
+  projectId: string,
   title: string,
 ): Promise<PreviewOutcome> {
   return fetchPreview(`/projects/${projectId}/preview/`, title);
@@ -71,7 +71,7 @@ export function previewProject(
 
 /** Legacy single-file preview — mirrors downloadCertificate. */
 export function previewCertificate(
-  certificateId: number,
+  certificateId: string,
   title: string,
 ): Promise<PreviewOutcome> {
   return fetchPreview(`/certificates/${certificateId}/preview/`, title);
@@ -79,7 +79,7 @@ export function previewCertificate(
 
 /** Previews one attachment from a project's `files` list. */
 export function previewProjectFile(
-  fileId: number,
+  fileId: string,
   displayName: string,
 ): Promise<PreviewOutcome> {
   return fetchPreview(`/project-files/${fileId}/preview/`, displayName);
@@ -87,7 +87,7 @@ export function previewProjectFile(
 
 /** Previews one attachment from a certificate's `files` list. */
 export function previewCertificateFile(
-  fileId: number,
+  fileId: string,
   displayName: string,
 ): Promise<PreviewOutcome> {
   return fetchPreview(`/certificate-files/${fileId}/preview/`, displayName);
