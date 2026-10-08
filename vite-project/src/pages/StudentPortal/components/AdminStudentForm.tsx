@@ -5,7 +5,7 @@ import { api, apiErrorMessage } from "../../../lib/api";
 import type { EnrollmentType, StudentProfile } from "../types";
 
 export interface AdminStudentFormInitial {
-  id: number;
+  id: string;
   full_name: string;
   phone_number: string;
   college_name: string;
