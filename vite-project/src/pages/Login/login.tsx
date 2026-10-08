@@ -3,8 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "https://maxotechs-website-mt96.vercel.app";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -23,22 +22,13 @@ const Login: React.FC = () => {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/login`,
-        {
-          username,
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { username, password },
+        { headers: { "Content-Type": "application/json" } }
       );
 
       console.log("Login successful:", response.data);
-
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("username", username);
-
       navigate("/dashboard");
     } catch (err: unknown) {
       console.error("Login error:", err);
@@ -66,7 +56,6 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-
         <h1 className="text-3xl font-bold text-center text-[#071b3a] mb-8">
           Welcome Back
         </h1>
@@ -78,15 +67,10 @@ const Login: React.FC = () => {
         )}
 
         <form onSubmit={handleSubmit}>
-
           <div className="mb-6">
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
               Username
             </label>
-
             <input
               id="username"
               type="text"
@@ -99,13 +83,9 @@ const Login: React.FC = () => {
           </div>
 
           <div className="mb-6">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
-
             <input
               id="password"
               type="password"
@@ -124,7 +104,6 @@ const Login: React.FC = () => {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-
         </form>
 
         <div className="flex items-center my-6">
@@ -150,7 +129,6 @@ const Login: React.FC = () => {
             Sign up
           </button>
         </p>
-
       </div>
     </div>
   );
