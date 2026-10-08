@@ -1,9 +1,11 @@
 import axios from "axios";
 import type { AxiosError, InternalAxiosRequestConfig } from "axios";
 
-/** Base URL for the Node.js/Express backend. */
+/** Use the local backend during development and same-origin routing in production. */
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || (typeof window !== "undefined" ? window.location.origin : "http://localhost:8000");
+  import.meta.env.DEV
+    ? (import.meta.env.VITE_API_BASE_URL || "http://localhost:8000")
+    : "";
 
 const ACCESS_TOKEN_KEY = "maxotechs_portal_access_token";
 const REFRESH_TOKEN_KEY = "maxotechs_portal_refresh_token";
