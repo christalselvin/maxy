@@ -294,6 +294,11 @@ app.get(["/blogs/search","/api/blogs/search"],async(req,res)=>{const title=Strin
 
 app.use((error,req,res,next)=>{console.error(error);if(error instanceof multer.MulterError)return bad(res,error.message,400);res.status(500).json({detail:error.message||"Internal server error"})});
 export { app };
+export default app;
+
+if (process.env.VERCEL) {
+  initializeDatabase().catch((error) => console.error("Database initialization failed:", error));
+}
 
 if (!process.env.VERCEL) {
   initializeDatabase()
