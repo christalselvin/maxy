@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import crypto from "node:crypto";
@@ -19,6 +20,7 @@ app.use(cors({
     ? callback(null, true) : callback(new Error("CORS blocked")),
   exposedHeaders: ["Content-Disposition"],
 }));
+app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 
 const bad = (res, detail, status=400) => res.status(status).json({ detail });
@@ -265,7 +267,7 @@ async function fileEndpoint(req,res,table,id,inline){
     const me=await query("SELECT id FROM student_profiles WHERE user_id=$1",[req.auth.sub]);
     if(!me.rowCount||me.rows[0].id!==q.rows[0].student_id)return bad(res,"Access denied.",403);
   }
-  const f=q.rows[0];res.set("Content-Type",f.mimetype||"application/octet-stream");res.set("Content-Disposition",`${inline?"inline":"attachment"}; filename*=UTF-8''${encodeURIComponent(f.file_name)}`);res.send(f.data);
+  const f=q.rows[0];res.set("Content-Type",f.mimetype||"application/octet-stream");res.set("Cache-Control","private, max-age=3600");res.set("Content-Disposition",`${inline?"inline":"attachment"}; filename*=UTF-8''${encodeURIComponent(f.file_name)}`);res.send(f.data);
 }
 for(const [url,table] of [["project-files","project_files"],["certificate-files","certificate_files"]]){
   app.get(`/api/${url}/:id/download/`,auth,(req,res)=>fileEndpoint(req,res,table,req.params.id,false));
@@ -276,7 +278,7 @@ app.get("/api/projects/:id/preview/",auth,(req,res)=>fileEndpoint(req,res,"proje
 app.get("/api/certificates/:id/download/",auth,(req,res)=>fileEndpoint(req,res,"certificate_files",req.params.id,false));
 app.get("/api/certificates/:id/preview/",auth,(req,res)=>fileEndpoint(req,res,"certificate_files",req.params.id,true));
 
-app.get("/api/media",async(req,res)=>{const q=await query("SELECT data,mimetype FROM stored_files WHERE key=$1",[String(req.query.key||"")]);if(!q.rowCount)return bad(res,"File not found.",404);res.set("Content-Type",q.rows[0].mimetype||"application/octet-stream");res.send(q.rows[0].data)});
+app.get("/api/media",async(req,res)=>{const q=await query("SELECT data,mimetype FROM stored_files WHERE key=$1",[String(req.query.key||"")]);if(!q.rowCount)return bad(res,"File not found.",404);res.set("Content-Type",q.rows[0].mimetype||"application/octet-stream");res.set("Cache-Control","public, max-age=3600, stale-while-revalidate=86400");res.send(q.rows[0].data)});
 
 app.post("/login",async(req,res)=>{const q=await query("SELECT * FROM users WHERE username=$1",[req.body?.username]);if(!q.rowCount)return bad(res,"User not found",404);if(req.body?.password!==q.rows[0].password_hash)return bad(res,"Invalid password",401);res.json({message:"Login successful"})});
 app.post("/register",async(req,res)=>{const {username,password}=req.body||{};if(!username||!password)return bad(res,"Enter all fields");try{await query("INSERT INTO users(username,password_hash) VALUES($1,$2)",[username,password]);res.status(201).json({message:"User inserted successfully"})}catch(e){if(e.code==="23505")return bad(res,"Username already exists",409);throw e}});
