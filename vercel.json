@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm install && npm install --prefix Backend && npm install --prefix vite-project",
+  "buildCommand": "npm run build",
+  "outputDirectory": "vite-project/dist",
+  "rewrites": [
+    { "source": "/login", "destination": "/api/login" },
+    { "source": "/register", "destination": "/api/register" },
+    { "source": "/blog", "destination": "/api/blog" },
+    { "source": "/contact", "destination": "/api/contact" },
+    { "source": "/blogs", "destination": "/api/blogs" },
+    { "source": "/blogs/titles", "destination": "/api/blogs/titles" },
+    { "source": "/blogs/search", "destination": "/api/blogs/search" },
+    { "source": "/contacts", "destination": "/api/contacts" },
+    { "source": "/blogs/:path*", "destination": "/api/blogs/:path*" },
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+  ]
+}
