@@ -11,7 +11,7 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || "change-this-in-production",
   accessTtl: process.env.ACCESS_TOKEN_TTL || "15m",
   refreshTtl: process.env.REFRESH_TOKEN_TTL || "7d",
-  corsOrigins: (process.env.CORS_ORIGINS || "http://localhost:5173")
+  corsOrigins: (process.env.CORS_ORIGINS || "http://localhost:5173,http://localhost:5174,https://maxotechs.com,https://www.maxotechs.com")
     .split(",").map((value) => value.trim()).filter(Boolean),
 };
 
