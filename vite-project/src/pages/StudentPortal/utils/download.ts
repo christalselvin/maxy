@@ -87,7 +87,7 @@ function slugify(value: string): string {
 /** Legacy single-file download — still used for any project whose only
  * attachment is the original `file` field. */
 export function downloadProject(
-  projectId: number,
+  projectId: string,
   title: string,
 ): Promise<string | null> {
   return downloadProtectedFile(`/projects/${projectId}/download/`, slugify(title));
@@ -95,7 +95,7 @@ export function downloadProject(
 
 /** Legacy single-file download — see downloadProject. */
 export function downloadCertificate(
-  certificateId: number,
+  certificateId: string,
   title: string,
 ): Promise<string | null> {
   return downloadProtectedFile(
@@ -106,7 +106,7 @@ export function downloadCertificate(
 
 /** Downloads one attachment from a project's `files` list. */
 export function downloadProjectFile(
-  fileId: number,
+  fileId: string,
   displayName: string,
 ): Promise<string | null> {
   return downloadProtectedFile(
@@ -117,7 +117,7 @@ export function downloadProjectFile(
 
 /** Downloads one attachment from a certificate's `files` list. */
 export function downloadCertificateFile(
-  fileId: number,
+  fileId: string,
   displayName: string,
 ): Promise<string | null> {
   return downloadProtectedFile(
