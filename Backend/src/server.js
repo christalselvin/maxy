@@ -297,7 +297,7 @@ export { app };
 export default app;
 
 if (process.env.VERCEL) {
-  initializeDatabase().catch((error) => console.error("Database initialization failed:", error));
+  await initializeDatabase();
 }
 
 if (!process.env.VERCEL) {
