@@ -6,6 +6,7 @@ import multer from "multer";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import os from "node:os";
 import { spawn } from "node:child_process";
 import sharp from "sharp";
@@ -36,8 +37,9 @@ function auth(req,res,next){
 }
 const requireRole=(wanted)=>(req,res,next)=>req.auth?.role===wanted?next():bad(res,"You do not have permission to perform this action.",403);
 
-async function init(){
-  const sql=await fs.readFile(path.join(process.cwd(),"db/schema.sql"),"utf8");
+export async function initializeDatabase(){
+  const schemaPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "../db/schema.sql");
+  const sql=await fs.readFile(schemaPath,"utf8");
   for(const s of sql.split(";").map(x=>x.trim()).filter(Boolean)) await query(s);
 }
 const mediaUrl=(key)=>key?"/api/media?key="+encodeURIComponent(key):null;
@@ -291,4 +293,10 @@ app.get("/contacts",async(req,res)=>{const q=await query("SELECT id,name,email,p
 app.get("/blogs/search",async(req,res)=>{const title=String(req.query.title||"").trim();if(!title)return bad(res,"Title query parameter is required");const q=await query("SELECT id,title,heading,subheading,content,author,category,tags,image_link,video_link,created_at FROM blogs WHERE title ILIKE '%'||$1||'%' ORDER BY created_at DESC",[title]);res.json({count:q.rowCount,blogs:q.rows.map(b=>({...b,_id:b.id}))})});
 
 app.use((error,req,res,next)=>{console.error(error);if(error instanceof multer.MulterError)return bad(res,error.message,400);res.status(500).json({detail:error.message||"Internal server error"})});
-init().then(()=>app.listen(config.port,"0.0.0.0",()=>console.log(`MaxoTechs Node API listening on port ${config.port}`))).catch((error)=>{console.error("Startup failed:",error);process.exit(1)});
+export { app };
+
+if (!process.env.VERCEL) {
+  initializeDatabase()
+    .then(() => app.listen(config.port,"0.0.0.0",()=>console.log(`MaxoTechs Node API listening on port ${config.port}`)))
+    .catch((error)=>{console.error("Startup failed:",error);process.exit(1)});
+}
