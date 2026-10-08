@@ -9,7 +9,7 @@ import {
 import { api, apiErrorMessage } from "../../../lib/api";
 
 export interface ManagedFile {
-  id: number;
+  id: string;
   file: string | null;
   name: string;
   uploaded_at: string;
@@ -39,7 +39,7 @@ const AdminFileManager = ({
   accentColor?: "blue" | "cyan";
 }) => {
   const [uploading, setUploading] = useState(false);
-  const [removingId, setRemovingId] = useState<number | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -68,7 +68,7 @@ const AdminFileManager = ({
     }
   };
 
-  const handleRemove = async (fileId: number) => {
+  const handleRemove = async (fileId: string) => {
     setRemovingId(fileId);
     setError("");
     try {
