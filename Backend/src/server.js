@@ -31,7 +31,7 @@ function auth(req,res,next){
 const requireRole=(wanted)=>(req,res,next)=>req.auth?.role===wanted?next():bad(res,"You do not have permission to perform this action.",403);
 
 async function init(){
-  const sql=await fs.readFile(path.join(process.cwd(),"Backend/db/schema.sql"),"utf8");
+  const sql=await fs.readFile(path.join(process.cwd(),"db/schema.sql"),"utf8");
   for(const s of sql.split(";").map(x=>x.trim()).filter(Boolean)) await query(s);
 }
 const mediaUrl=(key)=>key?"/api/media?key="+encodeURIComponent(key):null;
