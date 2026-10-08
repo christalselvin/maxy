@@ -17,7 +17,7 @@ const AdminProjectUploadForm = ({
   onClose,
   onUploaded,
 }: {
-  studentId: number;
+  studentId: string;
   /** Pass an existing project to switch this form into edit mode (PATCH
    * instead of POST, pre-filled fields). Adding/removing individual
    * files/images happens immediately below the form, independent of the
