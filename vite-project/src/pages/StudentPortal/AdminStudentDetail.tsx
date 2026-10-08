@@ -40,9 +40,7 @@ const AdminStudentDetail = () => {
 
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [deletingProjectId, setDeletingProjectId] = useState<number | null>(
-    null,
-  );
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
 
   const [showCertificateForm, setShowCertificateForm] = useState(false);
   const [editingCertificate, setEditingCertificate] =
