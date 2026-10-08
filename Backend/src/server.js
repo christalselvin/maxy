@@ -5,6 +5,10 @@ import multer from "multer";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
+import { spawn } from "node:child_process";
+import sharp from "sharp";
+import ffmpegPath from "ffmpeg-static";
 import { config } from "./config.js";
 import { pool, query } from "./db.js";
 
@@ -36,6 +40,67 @@ async function init(){
 }
 const mediaUrl=(key)=>key?"/api/media?key="+encodeURIComponent(key):null;
 
+const IMAGE_TYPES = new Set(["image/png","image/jpeg","image/jpg","image/webp","image/gif","image/avif","image/tiff","image/bmp"]);
+const VIDEO_TYPES = new Set(["video/mp4","video/webm","video/quicktime","video/x-msvideo","video/x-matroska","video/mpeg","video/ogg"]);
+const MAX_IMAGE_WIDTH = 1920;
+const MAX_IMAGE_HEIGHT = 1080;
+
+async function optimizeImage(file){
+  const image = sharp(file.buffer, { animated: file.mimetype === "image/gif" });
+  const metadata = await image.metadata();
+  const animated = Boolean(metadata.pages && metadata.pages > 1);
+  const output = await image
+    .resize({ width: MAX_IMAGE_WIDTH, height: MAX_IMAGE_HEIGHT, fit: "inside", withoutEnlargement: true })
+    .webp({ quality: 80, effort: 4, ...(animated ? { loop: 0 } : {}) })
+    .toBuffer();
+  return {
+    buffer: output,
+    mimetype: "image/webp",
+    originalname: file.originalname.replace(/\.(png|jpe?g|gif|webp|avif|tiff?|bmp)$/i, ".webp"),
+  };
+}
+
+function runFfmpeg(inputPath, outputPath){
+  return new Promise((resolve, reject) => {
+    const args = [
+      "-y", "-i", inputPath,
+      "-vf", "scale=w='min(1920,iw)':h='min(1080,ih)':force_original_aspect_ratio=decrease",
+      "-c:v", "libvpx-vp9", "-crf", "32", "-b:v", "0", "-deadline", "good", "-cpu-used", "4",
+      "-c:a", "libopus", "-b:a", "96k",
+      outputPath,
+    ];
+    const child = spawn(ffmpegPath, args);
+    let stderr = "";
+    child.stderr.on("data", chunk => { stderr += chunk.toString(); });
+    child.on("error", reject);
+    child.on("close", code => code === 0 ? resolve() : reject(new Error(`FFmpeg failed with code ${code}: ${stderr.slice(-1200)}`)));
+  });
+}
+
+async function optimizeVideo(file){
+  const base = crypto.randomUUID();
+  const inputPath = path.join(os.tmpdir(), `${base}-input${path.extname(file.originalname) || ".bin"}`);
+  const outputPath = path.join(os.tmpdir(), `${base}.webm`);
+  await fs.writeFile(inputPath, file.buffer);
+  try{
+    await runFfmpeg(inputPath, outputPath);
+    return {
+      buffer: await fs.readFile(outputPath),
+      mimetype: "video/webm",
+      originalname: file.originalname.replace(/\.[^.]+$/i, ".webm"),
+    };
+  }finally{
+    await Promise.allSettled([fs.unlink(inputPath), fs.unlink(outputPath)]);
+  }
+}
+
+async function optimizeUpload(file){
+  if(!file) return null;
+  if(IMAGE_TYPES.has(file.mimetype)) return optimizeImage(file);
+  if(VIDEO_TYPES.has(file.mimetype)) return optimizeVideo(file);
+  return file;
+}
+
 async function getProfile(studentId){
   const s=await query("SELECT sp.*,pu.phone_number,pu.full_name FROM student_profiles sp JOIN portal_users pu ON pu.id=sp.user_id WHERE sp.id=$1",[studentId]);
   if(!s.rowCount) return null;
@@ -58,7 +123,8 @@ async function getProfile(studentId){
 }
 async function saveFiles(table, ownerColumn, ownerId, studentId, files){
   const out=[];
-  for(const file of files||[]){
+  for(const originalFile of files||[]){
+    const file=await optimizeUpload(originalFile);
     const id=crypto.randomUUID();
     await query(`INSERT INTO ${table}(id,${ownerColumn},student_id,file_name,mimetype,data) VALUES($1,$2,$3,$4,$5,$6)`,[id,ownerId,studentId,file.originalname,file.mimetype,file.buffer]);
     out.push({id,file:null,name:file.originalname,uploaded_at:new Date().toISOString()});
@@ -141,7 +207,7 @@ app.post("/api/admin/students/",auth,requireRole("admin"),upload.single("photo")
     const phone=field(req,"phone_number").trim();if(!phone){await client.query("ROLLBACK");return bad(res,"Phone number is required.");}
     const u=await client.query("INSERT INTO portal_users(phone_number,full_name,role) VALUES($1,$2,'student') RETURNING id",[phone,field(req,"full_name")]);
     const s=await client.query("INSERT INTO student_profiles(user_id,college_name,course_name,branch,year,enrollment_type) VALUES($1,$2,$3,$4,$5,$6) RETURNING id",[u.rows[0].id,field(req,"college_name"),field(req,"course_name"),field(req,"branch"),field(req,"year"),field(req,"enrollment_type","course")]);
-    if(req.file){const key="student/"+s.rows[0].id;await client.query("UPDATE student_profiles SET photo_key=$1,photo_name=$2 WHERE id=$3",[key,req.file.originalname,s.rows[0].id]);await client.query("INSERT INTO stored_files(key,data,mimetype) VALUES($1,$2,$3) ON CONFLICT(key) DO UPDATE SET data=EXCLUDED.data,mimetype=EXCLUDED.mimetype",[key,req.file.buffer,req.file.mimetype]);}
+    if(req.file){const file=await optimizeUpload(req.file);const key="student/"+s.rows[0].id;await client.query("UPDATE student_profiles SET photo_key=$1,photo_name=$2 WHERE id=$3",[key,file.originalname,s.rows[0].id]);await client.query("INSERT INTO stored_files(key,data,mimetype) VALUES($1,$2,$3) ON CONFLICT(key) DO UPDATE SET data=EXCLUDED.data,mimetype=EXCLUDED.mimetype",[key,file.buffer,file.mimetype]);}
     await client.query("COMMIT");
     res.status(201).json(await getProfile(s.rows[0].id));
   }catch(e){await client.query("ROLLBACK");if(e.code==="23505")return bad(res,"That phone number is already in use.",409);throw e;}finally{client.release();}
@@ -153,7 +219,7 @@ app.patch("/api/admin/students/:id/",auth,requireRole("admin"),upload.single("ph
   try{
     await query("UPDATE portal_users SET phone_number=$1,full_name=$2 WHERE id=$3",[phone,field(req,"full_name",u.rows[0].full_name),uid]);
     await query("UPDATE student_profiles SET college_name=$1,course_name=$2,branch=$3,year=$4,enrollment_type=$5 WHERE id=$6",[field(req,"college_name"),field(req,"course_name"),field(req,"branch"),field(req,"year"),field(req,"enrollment_type","course"),req.params.id]);
-    if(req.file){const key="student/"+req.params.id;await query("UPDATE student_profiles SET photo_key=$1,photo_name=$2 WHERE id=$3",[key,req.file.originalname,req.params.id]);await query("INSERT INTO stored_files(key,data,mimetype) VALUES($1,$2,$3) ON CONFLICT(key) DO UPDATE SET data=EXCLUDED.data,mimetype=EXCLUDED.mimetype",[key,req.file.buffer,req.file.mimetype]);}
+    if(req.file){const file=await optimizeUpload(req.file);const key="student/"+req.params.id;await query("UPDATE student_profiles SET photo_key=$1,photo_name=$2 WHERE id=$3",[key,file.originalname,req.params.id]);await query("INSERT INTO stored_files(key,data,mimetype) VALUES($1,$2,$3) ON CONFLICT(key) DO UPDATE SET data=EXCLUDED.data,mimetype=EXCLUDED.mimetype",[key,file.buffer,file.mimetype]);}
     res.json(await getProfile(req.params.id));
   }catch(e){if(e.code==="23505")return bad(res,"That phone number is already in use.",409);throw e;}
 });
