@@ -45,9 +45,7 @@ const AdminStudentDetail = () => {
   const [showCertificateForm, setShowCertificateForm] = useState(false);
   const [editingCertificate, setEditingCertificate] =
     useState<Certificate | null>(null);
-  const [deletingCertificateId, setDeletingCertificateId] = useState<
-    number | null
-  >(null);
+  const [deletingCertificateId, setDeletingCertificateId] = useState<string | null>(null);
 
   const fetchStudent = useCallback(() => {
     if (!studentId) return;
