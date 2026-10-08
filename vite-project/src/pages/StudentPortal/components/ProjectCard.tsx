@@ -60,9 +60,7 @@ const ProjectCard = ({
   onDelete?: (project: Project) => void;
 }) => {
   const [downloadingLegacy, setDownloadingLegacy] = useState(false);
-  const [downloadingFileId, setDownloadingFileId] = useState<number | null>(
-    null,
-  );
+  const [downloadingFileId, setDownloadingFileId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const {
     preview,
